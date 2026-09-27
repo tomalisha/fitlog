@@ -33,18 +33,18 @@ export default function Navbar() {
 
   return (
     <header className="border-b border-[#272a2d] bg-[#0b0d0f]">
-      <nav className="mx-auto flex min-h-[76px] max-w-[1200px] items-center justify-between gap-6 px-5 sm:px-6 lg:px-8">
+      <nav className="mx-auto flex min-h-[76px] max-w-[1200px] items-center justify-between gap-3 px-4 sm:gap-6 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-3"
+          className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-3"
         >
           <img
             src="/logo.png"
             alt="FitLog Logo"
-            className="h-10 w-auto object-contain"
+            className="h-9 w-auto object-contain sm:h-10"
           />
 
-          <span className="text-2xl font-black tracking-tight text-white">
+          <span className="text-xl font-black tracking-tight text-white sm:text-2xl">
             FIT<span className="text-[#ccff00]">LOG</span>
           </span>
         </Link>
@@ -73,24 +73,24 @@ export default function Navbar() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <Link
             href="/my-plan"
-            className="rounded-full bg-[#ccff00] px-3 py-2 text-xs font-bold uppercase tracking-wide text-black transition hover:opacity-90"
+            className="rounded-full bg-[#ccff00] px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide text-black transition hover:opacity-90 sm:px-3 sm:py-2 sm:text-xs"
           >
-            Plan <span className="ml-1">{planCount}</span>
+            Plan <span className="ml-0.5 sm:ml-1">{planCount}</span>
           </Link>
 
           <Link
             href="/my-plan"
-            className="rounded-full border border-[#ccff00] px-3 py-2 text-xs font-bold uppercase tracking-wide text-[#ccff00] transition hover:bg-[#ccff00] hover:text-black"
+            className="rounded-full border border-[#ccff00] px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[#ccff00] transition hover:bg-[#ccff00] hover:text-black sm:px-3 sm:py-2 sm:text-xs"
           >
-            Saved <span className="ml-1">{savedCount}</span>
+            Saved <span className="ml-0.5 sm:ml-1">{savedCount}</span>
           </Link>
         </div>
       </nav>
 
-      <div className="border-t border-[#272a2d] px-5 py-3 md:hidden">
+      <div className="border-t border-[#272a2d] px-4 py-3 md:hidden">
         <div className="mx-auto flex max-w-[1200px] items-center justify-center gap-2">
           <Link
             href="/"
