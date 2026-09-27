@@ -13,6 +13,8 @@ import {
   notifyStorageUpdate,
 } from "../../lib/storage";
 
+const COMPLETED_KEY = "fitlog-completed";
+
 export default function MyPlanPage() {
   const [plan, setPlan] = useState<Workout[]>([]);
   const [saved, setSaved] = useState<Workout[]>([]);
@@ -20,14 +22,38 @@ export default function MyPlanPage() {
   const [completed, setCompleted] = useState<number[]>([]);
   const [toast, setToast] = useState("");
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState("duration");
 
   useEffect(() => {
     setPlan(getPlan());
     setSaved(getSaved());
+
+    const savedCompleted = localStorage.getItem(COMPLETED_KEY);
+
+    if (savedCompleted) {
+      setCompleted(JSON.parse(savedCompleted));
+    }
+
     setLoading(false);
   }, []);
 
   const currentWorkouts = activeTab === "plan" ? plan : saved;
+
+  const sortedWorkouts = [...currentWorkouts].sort((a, b) => {
+    if (sortBy === "duration") {
+      return a.duration - b.duration;
+    }
+
+    if (sortBy === "calories") {
+      return a.caloriesBurned - b.caloriesBurned;
+    }
+
+    if (sortBy === "rating") {
+      return b.rating - a.rating;
+    }
+
+    return 0;
+  });
 
   const totalMinutes = plan.reduce(
     (total, workout) => total + workout.duration,
@@ -48,9 +74,20 @@ export default function MyPlanPage() {
   }
 
   function markAsDone(id: number) {
-    setCompleted((prev) =>
-      prev.includes(id) ? prev : [...prev, id]
-    );
+    setCompleted((prev) => {
+      if (prev.includes(id)) {
+        return prev;
+      }
+
+      const updated = [...prev, id];
+
+      localStorage.setItem(
+        COMPLETED_KEY,
+        JSON.stringify(updated)
+      );
+
+      return updated;
+    });
 
     const workout = plan.find((item) => item.id === id);
 
@@ -119,48 +156,83 @@ export default function MyPlanPage() {
               <p className="text-xs uppercase tracking-wider text-gray-500">
                 Exercises
               </p>
-              <p className="mt-2 text-3xl font-black">{plan.length}</p>
+
+              <p className="mt-2 text-3xl font-black">
+                {plan.length}
+              </p>
             </div>
 
             <div className="border border-[#272a2d] bg-[#111416] p-5">
               <p className="text-xs uppercase tracking-wider text-gray-500">
                 Minutes
               </p>
-              <p className="mt-2 text-3xl font-black">{totalMinutes}</p>
+
+              <p className="mt-2 text-3xl font-black">
+                {totalMinutes}
+              </p>
             </div>
 
             <div className="border border-[#272a2d] bg-[#111416] p-5">
               <p className="text-xs uppercase tracking-wider text-gray-500">
                 Calories
               </p>
-              <p className="mt-2 text-3xl font-black">{totalCalories}</p>
+
+              <p className="mt-2 text-3xl font-black">
+                {totalCalories}
+              </p>
             </div>
           </div>
 
-          <div className="mt-12 flex gap-2 border-b border-[#272a2d]">
-            <button
-              type="button"
-              onClick={() => setActiveTab("plan")}
-              className={`px-5 py-3 text-sm font-bold uppercase tracking-wider ${
-                activeTab === "plan"
-                  ? "border-b-2 border-[#ccff00] text-[#ccff00]"
-                  : "text-gray-500"
-              }`}
-            >
-              Today&apos;s Plan
-            </button>
+          <div className="mt-12 flex flex-col gap-5 border-b border-[#272a2d] sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setActiveTab("plan")}
+                className={`px-5 py-3 text-sm font-bold uppercase tracking-wider ${
+                  activeTab === "plan"
+                    ? "border-b-2 border-[#ccff00] text-[#ccff00]"
+                    : "text-gray-500"
+                }`}
+              >
+                Today&apos;s Plan
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveTab("saved")}
-              className={`px-5 py-3 text-sm font-bold uppercase tracking-wider ${
-                activeTab === "saved"
-                  ? "border-b-2 border-[#ccff00] text-[#ccff00]"
-                  : "text-gray-500"
-              }`}
-            >
-              Saved
-            </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("saved")}
+                className={`px-5 py-3 text-sm font-bold uppercase tracking-wider ${
+                  activeTab === "saved"
+                    ? "border-b-2 border-[#ccff00] text-[#ccff00]"
+                    : "text-gray-500"
+                }`}
+              >
+                Saved
+              </button>
+            </div>
+
+            <div className="relative mb-3">
+              <label
+                htmlFor="sort-by"
+                className="mr-3 text-xs font-bold uppercase tracking-wider text-gray-500"
+              >
+                Sort By
+              </label>
+
+              <select
+                id="sort-by"
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value)}
+                className="appearance-none border border-[#3a3e42] bg-[#111416] px-4 py-3 pr-10 text-sm font-bold uppercase tracking-wider text-white outline-none transition focus:border-[#ccff00]"
+              >
+                <option value="duration">Duration</option>
+                <option value="calories">Calories</option>
+                <option value="rating">Rating</option>
+              </select>
+
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#ccff00]">
+                ▼
+              </span>
+            </div>
           </div>
 
           {loading ? (
@@ -173,7 +245,7 @@ export default function MyPlanPage() {
                 </p>
               </div>
             </div>
-          ) : currentWorkouts.length === 0 ? (
+          ) : sortedWorkouts.length === 0 ? (
             <div className="py-20 text-center">
               <h2 className="text-3xl font-black uppercase">
                 No workouts yet
@@ -192,7 +264,7 @@ export default function MyPlanPage() {
             </div>
           ) : (
             <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {currentWorkouts.map((workout) => {
+              {sortedWorkouts.map((workout) => {
                 const isDone = completed.includes(workout.id);
 
                 return (
@@ -222,6 +294,7 @@ export default function MyPlanPage() {
                       <div className="mt-4 flex gap-4 text-sm text-gray-400">
                         <span>{workout.duration} min</span>
                         <span>{workout.caloriesBurned} kcal</span>
+                        <span>★ {workout.rating}</span>
                       </div>
 
                       <div className="mt-5 flex flex-col gap-2">
@@ -243,7 +316,9 @@ export default function MyPlanPage() {
                                 : "bg-[#ccff00] text-black hover:bg-white"
                             }`}
                           >
-                            {isDone ? "Completed ✓" : "Mark as Done"}
+                            {isDone
+                              ? "Completed ✓"
+                              : "Mark as Done"}
                           </button>
                         )}
 
