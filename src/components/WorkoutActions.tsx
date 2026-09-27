@@ -41,6 +41,18 @@ export default function WorkoutActions({
   }
 
   function handleAddToPlan() {
+    const currentPlan = getPlan();
+
+    if (currentPlan.some((item) => item.id === workout.id)) {
+      showToast(`${workout.name} is already in today's plan.`);
+      return;
+    }
+
+    if (currentPlan.length >= 5) {
+      showToast("Today's plan can contain a maximum of 5 workouts.");
+      return;
+    }
+
     addToPlan(workout);
     notifyStorageUpdate();
 
